@@ -11,10 +11,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Uncomment to generate additional users using factories
-        // \App\Models\User::factory(10)->create();
+        
+        
 
-        // Call the UserSeeder
+        
         $this->call(UserSeeder::class);
+        $this->call(ProductSeeder::class);
     }
 }

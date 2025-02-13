@@ -16,18 +16,24 @@ class UserSeeder extends Seeder
                 'fullname' => 'Kuro No Kenshi',
                 'email' => 'kuro@gmail.com',
                 'password' => Hash::make('12345'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'username' => 'kibo',
                 'fullname' => 'Kibo No Uta',
                 'email' => 'kibo@gmail.com',
                 'password' => Hash::make('12345'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'username' => 'shiro',
                 'fullname' => 'Shiro No Neko',
                 'email' => 'shiro@gmail.com',
                 'password' => Hash::make('12345'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }
