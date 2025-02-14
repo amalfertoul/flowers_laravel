@@ -8,8 +8,19 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    // public function index()
+    // {
+    //     return response()->json(User::all());
+    // }
+
     public function index()
     {
+        $user = auth()->user();
+
+        if (!$user || !$user->isAdmin) {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+
         return response()->json(User::all());
     }
 
@@ -48,7 +59,7 @@ class UserController extends Controller
             'fullname' => $request->fullname ?? $user->fullname,
             'email' => $request->email ?? $user->email,
             'password' => $request->password ? Hash::make($request->password) : $user->password,
-            'isAdmin' => $request->isAdmin ?? $user->isAdmin,  
+            'isAdmin' => $request->isAdmin ?? $user->isAdmin,
         ]);
 
         return response()->json($user);
