@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Interaction</title>
-    <!-- Bootstrap 5.3.0 CDN without integrity attribute -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .logged-in {
@@ -22,8 +21,6 @@
 <body>
     <div class="container">
         <h2>API Interaction</h2>
-
-        <!-- Login Form -->
         <h3 id="targeted">Login</h3>
         <label for="email">Email:</label>
         <input type="text" id="email" class="form-control" value="kuro@gmail.com" required>
@@ -51,7 +48,6 @@
         <button class="btn btn-secondary mt-2" onclick="fetchData()">Go</button>
 
         <h3 class="mt-4">Response</h3>
-        <!-- Tabs for JSON and Table View -->
         <ul class="nav nav-tabs" id="responseTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="jsonTab" href="#jsonResponse" role="tab" aria-controls="jsonResponse" aria-selected="true" onclick="switchTab('json')">JSON Response</a>
@@ -69,7 +65,6 @@
             </div>
         </div>
 
-        <!-- Download Button for Events Excel -->
         <h3 class="mt-4">Download Events Excel</h3>
         <button class="btn btn-success" onclick="downloadExcel()">Download Excel File</button>
     </div>
@@ -79,7 +74,6 @@
     <script>
         let token = '';
 
-        // Login function to get the bearer token
         async function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -97,7 +91,7 @@
 
             if (response.ok) {
                 const data = await response.json();
-                token = data.token; // Store the token for future requests
+                token = data.token;
                 document.getElementById('targeted').textContent = 'Logged in';
                 document.getElementById('targeted').classList.add('logged-in');
                 alert('Logged in successfully!');
@@ -106,7 +100,6 @@
             }
         }
 
-        // Handle route selection from dropdown
         function selectRoute() {
             const selectedRoute = document.getElementById('apiRoutesList').value;
             document.getElementById('apiRoute').value = selectedRoute;
@@ -130,17 +123,14 @@
             const result = await response.json();
 
             if (response.ok) {
-                // JSON Response
                 document.getElementById('response').textContent = JSON.stringify(result, null, 2);
 
-                // Table View
                 const tableContainer = document.getElementById('tableContainer');
-                tableContainer.innerHTML = ''; // Clear previous content
+                tableContainer.innerHTML = '';
                 if (Array.isArray(result)) {
                     const table = document.createElement('table');
                     table.classList.add('table', 'table-bordered');
                     const headerRow = document.createElement('tr');
-                    // Assuming the first object is representative for the table headers
                     Object.keys(result[0]).forEach(key => {
                         const th = document.createElement('th');
                         th.textContent = key;
@@ -171,7 +161,6 @@
             }
         }
 
-        // Switch between tabs (JSON or Table View)
         function switchTab(tab) {
             const jsonTab = document.getElementById('jsonTab');
             const tableTab = document.getElementById('tableTab');
@@ -191,7 +180,6 @@
             }
         }
 
-        // Handle the Excel file download for events
         function downloadExcel() {
             const url = 'http://127.0.0.1:8000/api/events/export';
             fetch(url, {
@@ -202,15 +190,15 @@
             })
             .then(response => {
                 if (response.ok) {
-                    return response.blob(); // Get the file as a Blob
+                    return response.blob();
                 }
                 throw new Error('Failed to download file');
             })
             .then(blob => {
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = 'events.xlsx'; // Set the default file name
-                link.click(); // Trigger the download
+                link.download = 'events.xlsx';
+                link.click();
             })
             .catch(error => {
                 alert('Error: ' + error.message);
