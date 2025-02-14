@@ -1,8 +1,9 @@
 <?php
 namespace App\Http\Controllers;
-
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use App\Exports\EventsExport;
 
 class EventController extends Controller
 {
@@ -11,6 +12,11 @@ class EventController extends Controller
         return response()->json(Event::all());
     }
 
+    public function show($id)
+    {
+        $event = Event::findOrFail($id);
+        return response()->json($event);
+    }
     public function store(Request $request)
     {
         $request->validate([
@@ -29,5 +35,16 @@ class EventController extends Controller
     {
         Event::findOrFail($id)->delete();
         return response()->json(['message' => 'Event deleted']);
+    }
+
+    public function exportEvents()
+    {
+        $user = auth()->user();
+    
+        if (!$user || !$user->isAdmin) {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    
+        return Excel::download(new EventsExport, 'events.xlsx');
     }
 }
