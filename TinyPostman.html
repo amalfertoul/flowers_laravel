@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Interaction</title>
+    <!-- Bootstrap 5.3.0 CDN without integrity attribute -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .logged-in {
+            color: green;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>API Interaction</h2>
+
+        <!-- Login Form -->
+        <h3 id="targeted">Login</h3>
+        <label for="email">Email:</label>
+        <input type="text" id="email" class="form-control" value="kuro@gmail.com" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" class="form-control" value="12345" required>
+        <button id="loginButton" class="btn btn-primary" onclick="login()">Login</button>
+
+        <h3 class="mt-4">API Request</h3>
+        <label for="apiRoute">API Route:</label>
+        <input type="text" id="apiRoute" class="form-control" placeholder="Enter API route (e.g. /api/events)" required>
+
+        <label for="apiRoutesList">Choose from available GET routes:</label>
+        <select id="apiRoutesList" class="form-select" onchange="selectRoute()">
+            <option value="">-- Select Route --</option>
+            <option value="/api/cart">/api/cart</option>
+            <option value="/api/events">/api/events</option>
+            <option value="/api/orders">/api/orders</option>
+            <option value="/api/products">/api/products</option>
+            <option value="/api/reviews">/api/reviews</option>
+            <option value="/api/users">/api/users</option>
+            <option value="/api/events/export">/api/events/export</option>
+            <option value="/sanctum/csrf-cookie">/sanctum/csrf-cookie</option>
+            <option value="/storage/{path}">/storage/{path}</option>
+        </select>
+        <button class="btn btn-secondary mt-2" onclick="fetchData()">Go</button>
+
+        <h3 class="mt-4">Response</h3>
+        <!-- Tabs for JSON and Table View -->
+        <ul class="nav nav-tabs" id="responseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="jsonTab" href="#jsonResponse" role="tab" aria-controls="jsonResponse" aria-selected="true" onclick="switchTab('json')">JSON Response</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="tableTab" href="#tableResponse" role="tab" aria-controls="tableResponse" aria-selected="false" onclick="switchTab('table')">Table View</a>
+            </li>
+        </ul>
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="jsonResponse" role="tabpanel" aria-labelledby="jsonTab">
+                <textarea id="response" readonly></textarea>
+            </div>
+            <div class="tab-pane fade" id="tableResponse" role="tabpanel" aria-labelledby="tableTab">
+                <div id="tableContainer"></div>
+            </div>
+        </div>
+
+        <!-- Download Button for Events Excel -->
+        <h3 class="mt-4">Download Events Excel</h3>
+        <button class="btn btn-success" onclick="downloadExcel()">Download Excel File</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let token = '';
+
+        // Login function to get the bearer token
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('http://127.0.0.1:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                token = data.token; // Store the token for future requests
+                document.getElementById('targeted').textContent = 'Logged in';
+                document.getElementById('targeted').classList.add('logged-in');
+                alert('Logged in successfully!');
+            } else {
+                alert('Login failed!');
+            }
+        }
+
+        // Handle route selection from dropdown
+        function selectRoute() {
+            const selectedRoute = document.getElementById('apiRoutesList').value;
+            document.getElementById('apiRoute').value = selectedRoute;
+        }
+
+        async function fetchData() {
+            const apiRoute = document.getElementById('apiRoute').value.trim();
+            if (!apiRoute) {
+                alert('Please enter a valid API route.');
+                return;
+            }
+
+            const response = await fetch('http://127.0.0.1:8000' + apiRoute, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // JSON Response
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+
+                // Table View
+                const tableContainer = document.getElementById('tableContainer');
+                tableContainer.innerHTML = ''; // Clear previous content
+                if (Array.isArray(result)) {
+                    const table = document.createElement('table');
+                    table.classList.add('table', 'table-bordered');
+                    const headerRow = document.createElement('tr');
+                    // Assuming the first object is representative for the table headers
+                    Object.keys(result[0]).forEach(key => {
+                        const th = document.createElement('th');
+                        th.textContent = key;
+                        headerRow.appendChild(th);
+                    });
+                    table.appendChild(headerRow);
+
+                    result.forEach(item => {
+                        const row = document.createElement('tr');
+                        Object.values(item).forEach(value => {
+                            const td = document.createElement('td');
+                            td.textContent = value;
+                            row.appendChild(td);
+                        });
+                        table.appendChild(row);
+                    });
+
+                    tableContainer.appendChild(table);
+                } else {
+                    tableContainer.innerHTML = 'No data available for table view.';
+                }
+
+                if (apiRoute === '/api/events/export') {
+                    window.location.href = 'http://127.0.0.1:8000' + apiRoute;
+                }
+            } else {
+                document.getElementById('response').textContent = 'Error: ' + JSON.stringify(result, null, 2);
+            }
+        }
+
+        // Switch between tabs (JSON or Table View)
+        function switchTab(tab) {
+            const jsonTab = document.getElementById('jsonTab');
+            const tableTab = document.getElementById('tableTab');
+            const jsonContent = document.getElementById('jsonResponse');
+            const tableContent = document.getElementById('tableResponse');
+
+            if (tab === 'json') {
+                jsonTab.classList.add('active');
+                tableTab.classList.remove('active');
+                jsonContent.classList.add('show', 'active');
+                tableContent.classList.remove('show', 'active');
+            } else if (tab === 'table') {
+                tableTab.classList.add('active');
+                jsonTab.classList.remove('active');
+                tableContent.classList.add('show', 'active');
+                jsonContent.classList.remove('show', 'active');
+            }
+        }
+
+        // Handle the Excel file download for events
+        function downloadExcel() {
+            const url = 'http://127.0.0.1:8000/api/events/export';
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob(); // Get the file as a Blob
+                }
+                throw new Error('Failed to download file');
+            })
+            .then(blob => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'events.xlsx'; // Set the default file name
+                link.click(); // Trigger the download
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
