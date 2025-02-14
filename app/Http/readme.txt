@@ -1,0 +1,1 @@
+kernel.php moved to Bootstrap/app.php
