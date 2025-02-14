@@ -21,7 +21,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
 
-        return response()->json(User::all());
+        return response()->json(User::where('isAdmin', false)->get());
     }
 
     public function show($id)
