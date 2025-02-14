@@ -12,7 +12,7 @@ class User extends Authenticatable
 {
     use HasFactory;
 
-    protected $fillable = ['username', 'fullname', 'email', 'password', 'isAdmin'];
+    protected $fillable = ['username', 'fullname', 'email', 'password'];
 
     public function reviews()
     {
