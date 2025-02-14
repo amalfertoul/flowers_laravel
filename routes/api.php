@@ -12,20 +12,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\EventController;
 
 
-Route::post('login', function (Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    $user = User::where('email', $request->email)->first();
-
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    return response()->json(['token' => $user->createToken('Floral Dreams')->plainTextToken]);
-})->name('login');
+Route::post('login', [UserController::class, 'login']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
