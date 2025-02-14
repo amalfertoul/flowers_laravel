@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->decimal('total_price', 8, 2);
-            $table->string('status')->default('pending');
+            $table->enum('status', ['pending', 'completed', 'canceled'])->default('pending');
             $table->string('trackingNumber')->nullable();
             $table->timestamps();
         });
@@ -22,3 +22,4 @@ return new class extends Migration {
         Schema::dropIfExists('orders');
     }
 };
+
