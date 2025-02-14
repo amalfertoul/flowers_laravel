@@ -25,6 +25,7 @@ class UserController extends Controller
             'fullname' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:5',
+            'isAdmin' => 'boolean',
         ]);
 
         $user = User::create([
@@ -32,6 +33,7 @@ class UserController extends Controller
             'fullname' => $request->fullname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'isAdmin' => $request->isAdmin ?? false,
         ]);
 
         return response()->json($user, 201);
@@ -40,7 +42,15 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $user->update($request->all());
+
+        $user->update([
+            'username' => $request->username ?? $user->username,
+            'fullname' => $request->fullname ?? $user->fullname,
+            'email' => $request->email ?? $user->email,
+            'password' => $request->password ? Hash::make($request->password) : $user->password,
+            'isAdmin' => $request->isAdmin ?? $user->isAdmin,  
+        ]);
+
         return response()->json($user);
     }
 
@@ -50,5 +60,3 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted']);
     }
 }
-
-

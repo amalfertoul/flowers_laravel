@@ -24,9 +24,8 @@ Route::post('login', function (Request $request) {
         return response()->json(['message' => 'Unauthorized'], 401);
     }
 
-    
     return response()->json(['token' => $user->createToken('Floral Dreams')->plainTextToken]);
-});
+})->name('login');
 
 
 Route::middleware('auth:sanctum')->group(function () {

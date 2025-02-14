@@ -12,9 +12,11 @@ return new class extends Migration {
             $table->string('fullname');
             $table->string('email')->unique();
             $table->string('password');
+            $table->boolean('isAdmin')->default(false);
             $table->timestamps();
         });
     }
+    
 
     public function down(): void
     {
