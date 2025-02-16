@@ -15,11 +15,14 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'phrase' => 'required',
         ]);
-
-        $review = Review::create($request->all());
+    
+        $review = Review::create([
+            'user_id' => $request->user()->id,
+            'phrase' => $request->phrase,
+        ]);
+    
         return response()->json($review, 201);
     }
 
