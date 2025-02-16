@@ -16,12 +16,15 @@ class UserController extends Controller
     public function index()
     {
         $user = auth()->user();
-
+    
         if (!$user || !$user->isAdmin) {
             return response()->json(['message' => 'Access denied'], 403);
         }
-
-        return response()->json(User::where('isAdmin', false)->get());
+    
+        return response()->json(
+            User::where('isAdmin', false)
+                ->get(['id', 'username', 'fullname', 'email', 'created_at', 'updated_at'])
+        );
     }
 
     public function show($id)
