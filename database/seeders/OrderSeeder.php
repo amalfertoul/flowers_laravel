@@ -11,7 +11,7 @@ class OrderSeeder extends Seeder
     {
         DB::table('orders')->insert([
             [
-                'user_id' => 1,
+                'user_id' => 2,
                 'total_price' => 30.00,
                 'status' => 'completed',
                 'trackingNumber' => 'J8ETO47WSAP8',
@@ -19,7 +19,7 @@ class OrderSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
+                'user_id' => 3,
                 'total_price' => 12.00,
                 'status' => 'pending',
                 'trackingNumber' => 'R3PLN62YTQK1',
@@ -27,7 +27,7 @@ class OrderSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 3,
+                'user_id' => 4,
                 'total_price' => 54.00,
                 'status' => 'canceled',
                 'trackingNumber' => 'X9MGK85VWCZ4',

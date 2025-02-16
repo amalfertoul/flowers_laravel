@@ -38,6 +38,15 @@ class UserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'username' => 'hako',
+                'fullname' => 'Hako No Inu',
+                'email' => 'hako@gmail.com',
+                'password' => Hash::make('12345'),
+                'isAdmin' => false, 
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

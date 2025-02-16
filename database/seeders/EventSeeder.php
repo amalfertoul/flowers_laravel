@@ -11,7 +11,7 @@ class EventSeeder extends Seeder
     {
         DB::table('events')->insert([
             [
-                'user_id' => 1, 
+                'user_id' => 2, 
                 'eventDate' => '2025-03-15',
                 'phoneNumber' => '+212612345678', 
                 'eventTitle' => 'Wedding Ceremony',
@@ -20,7 +20,7 @@ class EventSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 2, 
+                'user_id' => 3, 
                 'eventDate' => '2025-04-10',
                 'phoneNumber' => '+212622345678', 
                 'eventTitle' => 'Birthday Celebration',
@@ -29,7 +29,7 @@ class EventSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 3, 
+                'user_id' => 4, 
                 'eventDate' => '2025-05-25',
                 'phoneNumber' => '+212632345678', 
                 'eventTitle' => 'Corporate Gala',
