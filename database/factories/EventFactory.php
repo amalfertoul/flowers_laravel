@@ -2,18 +2,19 @@
 
 namespace Database\Factories;
 
+use App\Models\Event;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-class UserFactory extends Factory
+class EventFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = User::class;
+    protected $model = Event::class;
 
     /**
      * Define the model's default state.
@@ -23,11 +24,11 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'username' => $this->faker->unique()->userName(),
-            'fullname' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
-            'password' => bcrypt('12345'),
-            'isAdmin' => $this->faker->boolean(1), // 1% chance to be an admin HHHHHH
+            'user_id' => User::factory(),
+            'eventDate' => $this->faker->dateTimeThisYear(),
+            'phoneNumber' => $this->faker->phoneNumber(),
+            'eventTitle' => $this->faker->sentence(),
+            'request' => $this->faker->paragraph(),
         ];
     }
 }
