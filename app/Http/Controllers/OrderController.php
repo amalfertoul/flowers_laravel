@@ -9,8 +9,22 @@ class OrderController extends Controller
 {
     public function index()
     {
-        return response()->json(Order::all());
+        $orders = Order::with('orderItems.product')->get();
+    
+        $orders = $orders->map(function ($order) {
+            $order->orderItems = $order->orderItems->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'quantity' => $item->quantity,
+                    'product_name' => $item->product->name,
+                ];
+            });
+            return $order;
+        });
+    
+        return response()->json($orders);
     }
+    
 
     public function show($id)
     {

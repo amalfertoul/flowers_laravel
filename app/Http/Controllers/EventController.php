@@ -20,16 +20,24 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'eventDate' => 'required|date',
             'phoneNumber' => 'required',
             'eventTitle' => 'required',
             'request' => 'required',
         ]);
-
-        $event = Event::create($request->all());
+    
+        $event = Event::create([
+            'user_id' => auth()->user()->id,
+            'eventDate' => $request->input('eventDate'),
+            'phoneNumber' => $request->input('phoneNumber'),
+            'eventTitle' => $request->input('eventTitle'),
+            'request' => $request->input('request'),
+        ]);
+    
         return response()->json($event, 201);
     }
+    
+    
 
     public function destroy($id)
     {

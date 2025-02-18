@@ -12,9 +12,24 @@
         .container {
             margin-top: 20px;
         }
+        .row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .col-md-6 {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .col-md-6:last-child {
+            margin-right: 0;
+        }
         textarea {
             width: 100%;
-            height: 300px;
+            height: 200px;
+        }
+        #response {
+            width: 100%;
+            height: 200px;
         }
     </style>
 </head>
@@ -29,39 +44,49 @@
         <button id="loginButton" class="btn btn-primary" onclick="login()">Login</button>
 
         <h3 class="mt-4">API Request</h3>
-        <label for="apiRoute">API Route:</label>
-        <input type="text" id="apiRoute" class="form-control" placeholder="Enter API route (e.g. /api/events)" required>
+        <div class="row">
+            <div class="col-md-6">
+                <label for="apiRoute">API Route:</label>
+                <input type="text" id="apiRoute" class="form-control" placeholder="Enter API route (e.g. /api/events)" required>
 
-        <label for="apiRoutesList">Choose from available GET routes:</label>
-        <select id="apiRoutesList" class="form-select" onchange="selectRoute()">
-            <option value="">-- Select Route --</option>
-            <option value="/api/cart">/api/cart</option>
-            <option value="/api/events">/api/events</option>
-            <option value="/api/orders">/api/orders</option>
-            <option value="/api/products">/api/products</option>
-            <option value="/api/reviews">/api/reviews</option>
-            <option value="/api/users">/api/users</option>
-            <option value="/api/events/export">/api/events/export</option>
-            <option value="/sanctum/csrf-cookie">/sanctum/csrf-cookie</option>
-            <option value="/storage/{path}">/storage/{path}</option>
-        </select>
-        <button class="btn btn-secondary mt-2" onclick="fetchData()">Go</button>
+                <label for="apiRoutesList">Choose from available GET routes:</label>
+                <select id="apiRoutesList" class="form-select" onchange="selectRoute()">
+                    <option value="">-- Select Route --</option>
+                    <option value="/api/cart">/api/cart</option>
+                    <option value="/api/events">/api/events</option>
+                    <option value="/api/orders">/api/orders</option>
+                    <option value="/api/products">/api/products</option>
+                    <option value="/api/reviews">/api/reviews</option>
+                    <option value="/api/users">/api/users</option>
+                    <option value="/api/events/export">/api/events/export</option>
+                    <option value="/sanctum/csrf-cookie">/sanctum/csrf-cookie</option>
+                    <option value="/storage/{path}">/storage/{path}</option>
+                </select>
 
-        <h3 class="mt-4">Response</h3>
-        <ul class="nav nav-tabs" id="responseTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="jsonTab" href="#jsonResponse" role="tab" aria-controls="jsonResponse" aria-selected="true" onclick="switchTab('json')">JSON Response</a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a class="nav-link" id="tableTab" href="#tableResponse" role="tab" aria-controls="tableResponse" aria-selected="false" onclick="switchTab('table')">Table View</a>
-            </li>
-        </ul>
-        <div class="tab-content mt-3">
-            <div class="tab-pane fade show active" id="jsonResponse" role="tabpanel" aria-labelledby="jsonTab">
-                <textarea id="response" readonly></textarea>
+                <h3 class="mt-4">Request Section</h3>
+                <textarea id="requestJson" placeholder="Enter your POST request JSON here..." required></textarea>
+
+                <button class="btn btn-secondary mt-2" onclick="sendPostRequest()">Send POST Request</button>
+                <button class="btn btn-secondary mt-2" onclick="fetchData()">Go</button>
             </div>
-            <div class="tab-pane fade" id="tableResponse" role="tabpanel" aria-labelledby="tableTab">
-                <div id="tableContainer"></div>
+            <div class="col-md-6">
+                <h3 class="mt-4">Response</h3>
+                <ul class="nav nav-tabs" id="responseTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="jsonTab" href="#jsonResponse" role="tab" aria-controls="jsonResponse" aria-selected="true" onclick="switchTab('json')">JSON Response</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="tableTab" href="#tableResponse" role="tab" aria-controls="tableResponse" aria-selected="false" onclick="switchTab('table')">Table View</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="jsonResponse" role="tabpanel" aria-labelledby="jsonTab">
+                        <textarea id="response" readonly></textarea>
+                    </div>
+                    <div class="tab-pane fade" id="tableResponse" role="tabpanel" aria-labelledby="tableTab">
+                        <div id="tableContainer"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -105,104 +130,188 @@
             document.getElementById('apiRoute').value = selectedRoute;
         }
 
-        async function fetchData() {
+        async function sendPostRequest() {
             const apiRoute = document.getElementById('apiRoute').value.trim();
-            if (!apiRoute) {
-                alert('Please enter a valid API route.');
+            const requestJson = document.getElementById('requestJson').value.trim();
+
+            if (!apiRoute || !requestJson) {
+                alert('Please enter a valid API route and request JSON.');
                 return;
             }
 
             const response = await fetch('http://127.0.0.1:8000' + apiRoute, {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
+                body: requestJson,
             });
 
             const result = await response.json();
-
             if (response.ok) {
                 document.getElementById('response').textContent = JSON.stringify(result, null, 2);
-
-                const tableContainer = document.getElementById('tableContainer');
-                tableContainer.innerHTML = '';
-                if (Array.isArray(result)) {
-                    const table = document.createElement('table');
-                    table.classList.add('table', 'table-bordered');
-                    const headerRow = document.createElement('tr');
-                    Object.keys(result[0]).forEach(key => {
-                        const th = document.createElement('th');
-                        th.textContent = key;
-                        headerRow.appendChild(th);
-                    });
-                    table.appendChild(headerRow);
-
-                    result.forEach(item => {
-                        const row = document.createElement('tr');
-                        Object.values(item).forEach(value => {
-                            const td = document.createElement('td');
-                            td.textContent = value;
-                            row.appendChild(td);
-                        });
-                        table.appendChild(row);
-                    });
-
-                    tableContainer.appendChild(table);
-                } else {
-                    tableContainer.innerHTML = 'No data available for table view.';
-                }
-
-                if (apiRoute === '/api/events/export') {
-                    window.location.href = 'http://127.0.0.1:8000' + apiRoute;
-                }
             } else {
                 document.getElementById('response').textContent = 'Error: ' + JSON.stringify(result, null, 2);
             }
         }
 
+        async function fetchData() {
+    const apiRoute = document.getElementById('apiRoute').value.trim();
+    if (!apiRoute) {
+        alert('Please enter a valid API route.');
+        return;
+    }
+
+    const response = await fetch('http://127.0.0.1:8000' + apiRoute, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+
+        const tableContainer = document.getElementById('tableContainer');
+        tableContainer.innerHTML = '';
+
+        // Render table for any route except orders
+        if (apiRoute !== '/api/orders' && Array.isArray(result)) {
+            const table = document.createElement('table');
+            table.classList.add('table', 'table-bordered', 'table-striped');
+
+            // Add table headers dynamically based on object keys
+            const headerRow = document.createElement('tr');
+            Object.keys(result[0]).forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header.charAt(0).toUpperCase() + header.slice(1); // Capitalize the first letter
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Add table rows
+            result.forEach(item => {
+                const row = document.createElement('tr');
+                Object.values(item).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    row.appendChild(td);
+                });
+                table.appendChild(row);
+            });
+
+            tableContainer.appendChild(table);
+        }
+
+        // Special rendering for orders (with images for items)
+        if (apiRoute === '/api/orders' && Array.isArray(result)) {
+            const table = document.createElement('table');
+            table.classList.add('table', 'table-bordered', 'table-striped');
+
+            // Add table headers
+            const headerRow = document.createElement('tr');
+            ['Order ID', 'User ID', 'Total Price', 'Status', 'Tracking Number', 'Order Items'].forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Add table rows
+            result.forEach(order => {
+                const row = document.createElement('tr');
+
+                // Basic order details
+                [
+                    order.id,
+                    order.user_id,
+                    `$${order.total_price}`,
+                    order.status,
+                    order.trackingNumber
+                ].forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    row.appendChild(td);
+                });
+
+                // Order items with images
+                const itemsCell = document.createElement('td');
+                if (order.order_items && order.order_items.length > 0) {
+                    order.order_items.forEach(item => {
+                        const itemContainer = document.createElement('div');
+                        itemContainer.style.marginBottom = '10px';
+
+                        // Add product image
+                        const img = document.createElement('img');
+                        img.src = `http://127.0.0.1:8000/${item.product.image}`;
+                        img.alt = item.product.name;
+                        img.style.width = '50px';
+                        img.style.height = '50px';
+                        img.style.marginRight = '10px';
+
+                        // Add product name and quantity
+                        const text = document.createElement('span');
+                        text.textContent = `${item.product.name} (x${item.quantity})`;
+
+                        itemContainer.appendChild(img);
+                        itemContainer.appendChild(text);
+                        itemsCell.appendChild(itemContainer);
+                    });
+                } else {
+                    itemsCell.textContent = 'No items available';
+                }
+
+                row.appendChild(itemsCell);
+                table.appendChild(row);
+            });
+
+            tableContainer.appendChild(table);
+        }
+    } else {
+        document.getElementById('response').textContent = 'Error: ' + JSON.stringify(result, null, 2);
+    }
+}
+
+
         function switchTab(tab) {
             const jsonTab = document.getElementById('jsonTab');
             const tableTab = document.getElementById('tableTab');
-            const jsonContent = document.getElementById('jsonResponse');
-            const tableContent = document.getElementById('tableResponse');
+            const jsonResponse = document.getElementById('jsonResponse');
+            const tableResponse = document.getElementById('tableResponse');
 
             if (tab === 'json') {
                 jsonTab.classList.add('active');
                 tableTab.classList.remove('active');
-                jsonContent.classList.add('show', 'active');
-                tableContent.classList.remove('show', 'active');
-            } else if (tab === 'table') {
+                jsonResponse.classList.add('show', 'active');
+                tableResponse.classList.remove('show', 'active');
+            } else {
                 tableTab.classList.add('active');
                 jsonTab.classList.remove('active');
-                tableContent.classList.add('show', 'active');
-                jsonContent.classList.remove('show', 'active');
+                tableResponse.classList.add('show', 'active');
+                jsonResponse.classList.remove('show', 'active');
             }
         }
 
         function downloadExcel() {
-            const url = 'http://127.0.0.1:8000/api/events/export';
-            fetch(url, {
+            fetch('http://127.0.0.1:8000/api/events/export', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
             })
-            .then(response => {
-                if (response.ok) {
-                    return response.blob();
-                }
-                throw new Error('Failed to download file');
-            })
+            .then(response => response.blob())
             .then(blob => {
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = 'events.xlsx';
                 link.click();
             })
-            .catch(error => {
-                alert('Error: ' + error.message);
-            });
+            .catch(error => console.error('Error downloading Excel:', error));
         }
     </script>
 </body>
