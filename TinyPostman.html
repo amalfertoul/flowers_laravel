@@ -90,8 +90,10 @@
             </div>
         </div>
 
-        <h3 class="mt-4">Download Events Excel</h3>
-        <button class="btn btn-success" onclick="downloadExcel()">Download Excel File</button>
+        <h3 class="mt-4">Download Files</h3>
+<button class="btn btn-success" onclick="downloadExcel()">Download Excel File</button>
+<button class="btn btn-info" onclick="downloadInvoice()">Download Invoice</button>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -312,6 +314,35 @@
                 link.click();
             })
             .catch(error => console.error('Error downloading Excel:', error));
+        }
+        function downloadInvoice() {
+            const orderId = prompt('Enter the Order ID to download the invoice:'); // Prompt user for Order ID
+
+            if (!orderId) {
+                alert('Order ID is required.');
+                return;
+            }
+
+            fetch(`http://127.0.0.1:8000/api/orders/${orderId}/invoice`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to download the invoice. Please check the Order ID and try again.');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `invoice_${orderId}.pdf`;
+                    link.click();
+                })
+                .catch(error => alert(error.message));
         }
     </script>
 </body>

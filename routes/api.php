@@ -16,6 +16,7 @@ Route::post('login', [UserController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('events/export', [EventController::class, 'exportEvents']);
+    Route::get('orders/{id}/invoice', [OrderController::class, 'downloadInvoice']);
     Route::apiResource('users', UserController::class);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('cart', CartController::class);

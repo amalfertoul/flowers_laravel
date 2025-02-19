@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -53,5 +54,20 @@ class OrderController extends Controller
     {
         Order::findOrFail($id)->delete();
         return response()->json(['message' => 'Order deleted']);
+    }
+
+    //functions outside of crud here
+    public function downloadInvoice($id)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->isAdmin) {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+
+        $order = Order::with(['user', 'orderItems.product'])->findOrFail($id);
+
+        $pdf = Pdf::loadView('invoice', compact('order'));
+        return $pdf->download('invoice_' . $order->id . '.pdf');
     }
 }
