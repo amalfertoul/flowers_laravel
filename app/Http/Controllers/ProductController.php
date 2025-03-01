@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -20,25 +21,60 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'image' => 'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:12560', // maximum 12.56MB size
             'price' => 'required|numeric',
             'stock' => 'required|integer',
         ]);
-
-        $product = Product::create($request->all());
+    
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imagePath = $image->store('products', 'public');
+        }
+    
+        $product = Product::create([
+            'name' => $request->name,
+            'image' => $imagePath ?? null,
+            'price' => $request->price,
+            'stock' => $request->stock,
+        ]);
+    
         return response()->json($product, 201);
     }
 
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        $product->update($request->all());
+
+        $request->validate([
+            'name' => 'sometimes|required',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:12560',
+            'price' => 'sometimes|required|numeric',
+            'stock' => 'sometimes|required|integer',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $image = $request->file('image');
+            $product->image = $image->store('products', 'public');
+        }
+
+        $product->update($request->only(['name', 'price', 'stock']));
+
         return response()->json($product);
     }
 
     public function destroy($id)
     {
-        Product::findOrFail($id)->delete();
+        $product = Product::findOrFail($id);
+
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        $product->delete();
+
         return response()->json(['message' => 'Product deleted']);
     }
 }

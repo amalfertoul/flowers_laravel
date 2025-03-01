@@ -10,7 +10,7 @@
             color: green;
         }
         .container {
-            margin-top: 20px;
+            margin: 50px;
         }
         .row {
             display: flex;
@@ -93,6 +93,69 @@
         <h3 class="mt-4">Download Files</h3>
 <button class="btn btn-success" onclick="downloadExcel()">Download Excel File</button>
 <button class="btn btn-info" onclick="downloadInvoice()">Download Invoice</button>
+<div id="productos">
+    <h3 class="mt-4">Create New Product</h3>
+    <form id="productForm" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="productName" class="form-label">Product Name:</label>
+            <input type="text" id="productName" class="form-control" placeholder="Enter product name" required>
+        </div>
+        <div class="mb-3">
+            <label for="productImage" class="form-label">Product Image:</label>
+            <input type="file" id="productImage" class="form-control" accept="image/*" required>
+        </div>
+        <div class="mb-3">
+            <label for="productPrice" class="form-label">Product Price:</label>
+            <input type="number" id="productPrice" class="form-control" placeholder="Enter product price" required>
+        </div>
+        <div class="mb-3">
+            <label for="productStock" class="form-label">Product Stock:</label>
+            <input type="number" id="productStock" class="form-control" placeholder="Enter product stock" required>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="createProduct()">Create Product</button>
+    </form>
+</div>
+
+<script>
+    async function createProduct() {
+        const productName = document.getElementById('productName').value.trim();
+        const productImage = document.getElementById('productImage').files[0];
+        const productPrice = document.getElementById('productPrice').value.trim();
+        const productStock = document.getElementById('productStock').value.trim();
+
+        if (!productName || !productImage || !productPrice || !productStock) {
+            alert('Please fill in all fields and upload an image.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', productName);
+        formData.append('image', productImage);
+        formData.append('price', productPrice);
+        formData.append('stock', productStock);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/products', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Product created successfully!');
+                console.log(result);
+            } else {
+                alert('Error creating product: ' + JSON.stringify(result));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while creating the product.');
+        }
+    }
+</script>
 
     </div>
 
@@ -181,21 +244,18 @@
         const tableContainer = document.getElementById('tableContainer');
         tableContainer.innerHTML = '';
 
-        // Render table for any route except orders
         if (apiRoute !== '/api/orders' && Array.isArray(result)) {
             const table = document.createElement('table');
             table.classList.add('table', 'table-bordered', 'table-striped');
 
-            // Add table headers dynamically based on object keys
             const headerRow = document.createElement('tr');
             Object.keys(result[0]).forEach(header => {
                 const th = document.createElement('th');
-                th.textContent = header.charAt(0).toUpperCase() + header.slice(1); // Capitalize the first letter
+                th.textContent = header.charAt(0).toUpperCase() + header.slice(1); 
                 headerRow.appendChild(th);
             });
             table.appendChild(headerRow);
 
-            // Add table rows
             result.forEach(item => {
                 const row = document.createElement('tr');
                 Object.values(item).forEach(value => {
@@ -209,12 +269,10 @@
             tableContainer.appendChild(table);
         }
 
-        // Special rendering for orders (with images for items)
         if (apiRoute === '/api/orders' && Array.isArray(result)) {
             const table = document.createElement('table');
             table.classList.add('table', 'table-bordered', 'table-striped');
 
-            // Add table headers
             const headerRow = document.createElement('tr');
             ['Order ID', 'User ID', 'Total Price', 'Status', 'Tracking Number', 'Order Items'].forEach(header => {
                 const th = document.createElement('th');
@@ -223,11 +281,9 @@
             });
             table.appendChild(headerRow);
 
-            // Add table rows
             result.forEach(order => {
                 const row = document.createElement('tr');
 
-                // Basic order details
                 [
                     order.id,
                     order.user_id,
@@ -240,14 +296,12 @@
                     row.appendChild(td);
                 });
 
-                // Order items with images
                 const itemsCell = document.createElement('td');
                 if (order.order_items && order.order_items.length > 0) {
                     order.order_items.forEach(item => {
                         const itemContainer = document.createElement('div');
                         itemContainer.style.marginBottom = '10px';
 
-                        // Add product image
                         const img = document.createElement('img');
                         img.src = `http://127.0.0.1:8000/${item.product.image}`;
                         img.alt = item.product.name;
@@ -255,7 +309,6 @@
                         img.style.height = '50px';
                         img.style.marginRight = '10px';
 
-                        // Add product name and quantity
                         const text = document.createElement('span');
                         text.textContent = `${item.product.name} (x${item.quantity})`;
 

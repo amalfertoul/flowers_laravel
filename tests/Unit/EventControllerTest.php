@@ -71,7 +71,7 @@ class EventControllerTest extends TestCase
 
     public function test_it_can_export_events()
     {
-        $adminUser = User::factory()->create(['isAdmin' => true]);
+        $adminUser = User::factory()->create(['isAdmin' => true]);//creates a user randomly
 
         $response = $this->actingAs($adminUser)->getJson('/api/events/export');
 

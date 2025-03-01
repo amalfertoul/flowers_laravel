@@ -13,11 +13,12 @@ use App\Http\Controllers\EventController;
 
 
 Route::post('login', [UserController::class, 'login']);
+Route::post('register', [UserController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('events/export', [EventController::class, 'exportEvents']);
     Route::get('orders/{id}/invoice', [OrderController::class, 'downloadInvoice']);
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserController::class); 
     Route::apiResource('products', ProductController::class);
     Route::apiResource('cart', CartController::class);
     Route::apiResource('orders', OrderController::class);
