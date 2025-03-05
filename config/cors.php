@@ -19,9 +19,8 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'http://localhost:5173', // React frontend
-        'http://localhost:8888',
+    'allowed_origins_patterns' => [
+        'http://127\.0\.0\.1:\d+', // all ports on 127.0.0.1 ig
     ],
 
     'allowed_origins_patterns' => [],
