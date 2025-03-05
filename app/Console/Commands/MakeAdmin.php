@@ -58,6 +58,7 @@ class MakeAdmin extends Command
                     return;  // Exit the command
             }
 
+            // Provide a "Go back to the main menu" prompt.
             $this->info("Click 'Enter' to go back to the main menu.");
             $this->ask('Press Enter to continue...');
             
@@ -165,8 +166,8 @@ class MakeAdmin extends Command
 
         $fieldChoice = $this->choice(
             'Which field would you like to update?',
-            ['username', 'fullname', 'email', 'Cancel'],
-            3
+            ['username', 'fullname', 'email', 'password', 'Cancel'],
+            4
         );
 
         if ($fieldChoice === 'Cancel') {
@@ -174,9 +175,15 @@ class MakeAdmin extends Command
             return;
         }
 
-        $newValue = $this->ask("Update {$fieldChoice} (Current: {$admin->$fieldChoice})") ?: $admin->$fieldChoice;
+        if ($fieldChoice === 'password') {
+            $newValue = $this->askWithValidation("Update {$fieldChoice} (Current: [hidden])", function ($input) {
+                return strlen($input) < 5 ? 'Password must be at least 5 characters long.' : true;
+            }, true);
+        } else {
+            $newValue = $this->ask("Update {$fieldChoice} (Current: {$admin->$fieldChoice})") ?: $admin->$fieldChoice;
+        }
 
-        $admin->$fieldChoice = $newValue;
+        $admin->$fieldChoice = $fieldChoice === 'password' ? Hash::make($newValue) : $newValue;
 
         $admin->save();
 
