@@ -74,20 +74,33 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted']);
     }
 
-    //functions out of CRUD should be put here ig
+
+
     public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        $user = User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        return response()->json(['token' => $user->createToken('Floral Dreams')->plainTextToken]);
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
+
+    $token = $user->createToken('Floral Dreams')->plainTextToken;
+
+    return response()->json([
+        'user' => [
+            'id' => $user->id,
+            'username' => $user->username,
+            'fullname' => $user->fullname, 
+            'email' => $user->email,
+            'isAdmin' => $user->isAdmin,
+        ],
+        'token' => $token
+    ]);
+}
+
 }
