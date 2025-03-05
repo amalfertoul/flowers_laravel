@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
         $this->call(OrderItemSeeder::class);
         $this->call(ReviewSeeder::class);
         $this->call(EventSeeder::class);
+        $this->call(FlowersDiskSeeder::class); // Add this line
     }
 }
